@@ -40,6 +40,20 @@ READY-MADE TOOLS / AGENTS / DATA
 - Every important thesis has an invalidation condition.
 - Do not add infrastructure unless required for the next decision gate.
 
+## Current execution path
+
+The first Finder worker is the existing `product-opportunity-finder-skill`:
+
+`AronLEEdev/product-opportunity-finder-skill`
+
+It is executed as a Claude Skill using Claude-in-Chrome against real Amazon data, with Helium 10 as an optional/recommended enrichment lane. The Core does not duplicate that browser workflow. The adapter in `adapters/finder_opportunity.py` converts the completed Finder report into the Core `AgentResult` contract.
+
+Target first run:
+
+`Amazon.es → Beverage → Water → Electrolyte Water`
+
+The workflow may continue in degraded mode when H10 is unavailable if the Finder can produce sufficient real Amazon evidence. H10 is not purchased or activated merely to satisfy the architecture. If the next gate genuinely requires a provider credential or paid metric, execution stops at that exact dependency and records the specific missing metric/function before any capital decision.
+
 ## Current scope
 
-v0.1: reusable core skeleton extracted from the `product-engine` laboratory repository. Concrete marketplace/data integrations are added only when a real bottleneck is proven.
+v0.1: reusable core skeleton extracted from the `product-engine` laboratory repository, plus the minimum Finder/Pain interfaces and Finder-output adapter needed to execute the first real cycle. Concrete provider integrations are added only when a real bottleneck is proven.
