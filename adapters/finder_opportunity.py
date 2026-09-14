@@ -19,10 +19,30 @@ def normalize_finder_report(report: dict[str, Any]) -> AgentResult:
     if not isinstance(shortlist, list):
         raise ValueError("Finder report must contain shortlist[]")
 
-    valid = [x for x in shortlist if isinstance(x, dict) and REQUIRED_OPPORTUNITY_KEYS <= x.keys()]
+    valid = [
+        x for x in shortlist
+        if isinstance(x, dict) and REQUIRED_OPPORTUNITY_KEYS <= x.keys()
+    ]
+
     evidence = report.get("evidence", [])
     if not isinstance(evidence, list):
         evidence = []
+
+    # The ready Finder normally stores evidence in the shortlist metrics rather
+    # than a separate evidence[] array. Promote those measured fields into the
+    # canonical Core evidence envelope without inventing values.
+    if not evidence:
+        for opportunity in valid:
+            metrics = opportunity.get("metrics", {})
+            if isinstance(metrics, dict) and metrics:
+                evidence.append({
+                    "source": "product-opportunity-finder-skill",
+                    "type": "marketplace_opportunity_metrics",
+                    "niche": opportunity.get("niche"),
+                    "score": opportunity.get("score"),
+                    "metrics": metrics,
+                    "exampleProducts": opportunity.get("exampleProducts", []),
+                })
 
     invalidation = report.get("invalidation_conditions", [])
     if not isinstance(invalidation, list):
@@ -37,6 +57,7 @@ def normalize_finder_report(report: dict[str, Any]) -> AgentResult:
         decision=decision,
         output={
             "category": report.get("category"),
+            "marketplace": report.get("marketplace"),
             "date": report.get("date"),
             "totals": report.get("totals", {}),
             "shortlist": valid,
